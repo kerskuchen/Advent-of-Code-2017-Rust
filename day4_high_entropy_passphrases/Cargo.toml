@@ -1,0 +1,6 @@
+[package]
+name = "day4_high_entropy_passphrases"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
