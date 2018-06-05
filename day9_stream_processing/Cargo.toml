@@ -1,0 +1,6 @@
+[package]
+name = "day9_stream_processing"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
