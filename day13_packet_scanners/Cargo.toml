@@ -1,0 +1,6 @@
+[package]
+name = "day13_packet_scanners"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
