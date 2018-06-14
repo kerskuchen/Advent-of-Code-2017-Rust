@@ -8,19 +8,46 @@ fn main() {
         .read_to_string(&mut input)
         .unwrap();
 
-    let mut sum = 0;
-    for line in input.lines() {
-        let digits_string: Vec<_> = line.trim().split_whitespace().collect();
-        let mut digits: Vec<_> = digits_string
-            .iter()
-            .map(|&x| x.parse::<i32>().unwrap())
-            .collect();
+    let rows_of_sorted_digits: Vec<Vec<i32>> = input
+        .lines()
+        .map(|line| {
+            let mut result = line.trim()
+                .split_whitespace()
+                .map(|x| x.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>();
+            result.sort();
+            result
+        })
+        .collect();
 
-        digits.sort();
-        let min = digits[0];
-        let max = digits[digits.len() - 1];
+    println!("{}", checksum_part1(&rows_of_sorted_digits));
+    println!("{}", checksum_part2(&rows_of_sorted_digits));
+}
+
+fn checksum_part1(rows_of_sorted_digits: &[Vec<i32>]) -> i32 {
+    let mut sum = 0;
+    for row in rows_of_sorted_digits {
+        let min = row[0];
+        let max = row[row.len() - 1];
         sum += max - min;
     }
+    sum
+}
 
-    println!("{}", sum);
+fn checksum_part2(rows_of_sorted_digits: &[Vec<i32>]) -> i32 {
+    let mut sum = 0;
+    'rowsloop: for row in rows_of_sorted_digits {
+        for i in 0..row.len() {
+            for j in (i + 1)..row.len() {
+                if row[i] % row[j] == 0 {
+                    sum += row[i] / row[j];
+                    continue 'rowsloop;
+                } else if row[j] % row[i] == 0 {
+                    sum += row[j] / row[i];
+                    continue 'rowsloop;
+                }
+            }
+        }
+    }
+    sum
 }
