@@ -1,71 +1,91 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::*;
 
 fn main() {
-    let mut input_text = String::new();
-    File::open("input.txt")
-        .unwrap()
-        .read_to_string(&mut input_text)
-        .unwrap();
-
-    let memory_chunk: Vec<_> = input_text
+    let initial_memory_configuration: Vec<u32> = BufReader::new(File::open("input.txt").unwrap())
+        .lines()
+        .filter_map(|line| line.ok())
+        .take(1)
+        .collect::<String>()
         .split_whitespace()
-        .map(|x| x.parse::<u32>().unwrap())
+        .map(|x| x.parse().unwrap())
         .collect();
 
-    let mut memory_chunk_history = Vec::new();
-    memory_chunk_history.push(memory_chunk);
+    let mut cur_redistribution_cycle = 0;
+    let mut configuration_history = Vec::new();
+    configuration_history.push((initial_memory_configuration, cur_redistribution_cycle));
 
-    let mut num_redistribution_cycles = 0;
     loop {
-        let mut memory_chunk = memory_chunk_history[memory_chunk_history.len() - 1].clone();
-        redistribute_blocks(&mut memory_chunk);
-        num_redistribution_cycles += 1;
-        if does_chunk_already_exist_in_history(&memory_chunk, &memory_chunk_history) {
+        let new_configuration = {
+            let cur_configuration = &configuration_history[configuration_history.len() - 1].0;
+            do_redistribution_cycle(cur_configuration)
+        };
+        cur_redistribution_cycle += 1;
+
+        if let Some((already_seen_configuration, cycle_of_occurrence)) =
+            check_if_configuration_exists(&new_configuration, &configuration_history)
+        {
+            println!(
+                "Found previous configuration {:?} which occured in cycle {} with of cycle-length of {}.",
+                already_seen_configuration, cycle_of_occurrence,
+                cur_redistribution_cycle - cycle_of_occurrence
+            );
+            println!(
+                "Found a configuration that has been seen before at cycle {}",
+                cur_redistribution_cycle
+            );
             break;
         }
-        memory_chunk_history.push(memory_chunk);
-    }
-
-    println!("{}", num_redistribution_cycles);
-}
-
-fn redistribute_blocks(memory_banks: &mut [u32]) {
-    let (mut index, mut num_blocks) = remove_bank_with_max_num_blocks(memory_banks);
-
-    while num_blocks > 0 {
-        index = (index + 1) % memory_banks.len();
-        memory_banks[index] += 1;
-        num_blocks -= 1;
+        configuration_history.push((new_configuration, cur_redistribution_cycle));
     }
 }
 
-fn remove_bank_with_max_num_blocks(memory_banks: &mut [u32]) -> (usize, u32) {
-    let mut max_num_blocks_index = 0;
-    let mut max_num_blocks = memory_banks[max_num_blocks_index];
+fn do_redistribution_cycle(configuration: &[u32]) -> Vec<u32> {
+    let (mut bank_index, mut num_blocks_to_redistribute) =
+        get_bank_entry_with_max_num_blocks(configuration);
 
-    for (index, &val) in memory_banks.iter().enumerate() {
-        if max_num_blocks < val {
-            max_num_blocks = val;
-            max_num_blocks_index = index;
-        }
+    let mut new_configuration: Vec<u32> = configuration.to_vec();
+    new_configuration[bank_index] = 0;
+
+    while num_blocks_to_redistribute > 0 {
+        bank_index = (bank_index + 1) % new_configuration.len();
+        new_configuration[bank_index] += 1;
+        num_blocks_to_redistribute -= 1;
     }
-    memory_banks[max_num_blocks_index] = 0;
+    new_configuration
+}
+
+fn get_bank_entry_with_max_num_blocks(configuration: &[u32]) -> (usize, u32) {
+    let (max_num_blocks_index, max_num_blocks) = configuration.iter().enumerate().fold(
+        (0, configuration[0]),
+        |(cur_bank_index, cur_max_num_blocks), (bank_index, &num_blocks)| {
+            if cur_max_num_blocks < num_blocks {
+                (bank_index, num_blocks)
+            } else {
+                (cur_bank_index, cur_max_num_blocks)
+            }
+        },
+    );
     (max_num_blocks_index, max_num_blocks)
 }
 
-fn does_chunk_already_exist_in_history(
-    memory_banks_cmp: &[u32],
-    memory_banks_history: &[Vec<u32>],
-) -> bool {
-    for memory_banks in memory_banks_history {
-        if are_memory_banks_equal(memory_banks_cmp, memory_banks) {
-            return true;
-        }
+fn check_if_configuration_exists(
+    configuration_to_compare: &[u32],
+    configuration_history: &[(Vec<u32>, usize)],
+) -> Option<(Vec<u32>, usize)> {
+    let duplicates: Vec<_> = configuration_history
+        .iter()
+        .filter(|(configuration, _cycle_of_occurrence)| {
+            are_configurations_equal(&configuration_to_compare, &configuration)
+        })
+        .collect();
+    if duplicates.is_empty() {
+        None
+    } else {
+        Some(duplicates[0].clone())
     }
-    false
 }
 
-fn are_memory_banks_equal(a: &[u32], b: &[u32]) -> bool {
+fn are_configurations_equal(a: &[u32], b: &[u32]) -> bool {
     (a.len() == b.len()) && a.iter().zip(b).all(|(x, y)| x == y)
 }
