@@ -21,9 +21,9 @@ fn main() {
         .unwrap()
         .read_to_string(&mut input)
         .unwrap();
-
     let input: Vec<_> = input.trim().split(',').collect();
 
+    let mut max_num_steps_from_origin = 0;
     let mut pos = Point { x: 0, y: 0 };
     for direction in input {
         match direction {
@@ -65,9 +65,25 @@ fn main() {
             }
             _ => panic!("invalid direction"),
         }
+
+        max_num_steps_from_origin =
+            i32::max(max_num_steps_from_origin, calc_numsteps_from_origin(&pos));
     }
 
-    let num_steps = if pos.x.signum() != pos.y.signum() {
+    println!(
+        "Furthest number of steps away from origin while walking: {}",
+        max_num_steps_from_origin
+    );
+
+    let final_num_steps_from_origin = calc_numsteps_from_origin(&pos);
+    println!(
+        "Number of steps away from origin after finished walking: {}",
+        final_num_steps_from_origin
+    );
+}
+
+fn calc_numsteps_from_origin(pos: &Point) -> i32 {
+    if pos.x.signum() != pos.y.signum() {
         // NOTE: Moving simultaneously in opposite x and y directions is equivalent to moving
         //       north/south and counts as one step (i.e. (1,-1) is north and (-1,1) is south).
         //       So in this case we can go north/south first till either x or y is zero and then
@@ -76,7 +92,5 @@ fn main() {
         std::cmp::max(pos.x.abs(), pos.y.abs())
     } else {
         pos.x.abs() + pos.y.abs()
-    };
-
-    println!("{:?}", num_steps);
+    }
 }
