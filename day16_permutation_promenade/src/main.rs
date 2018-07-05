@@ -8,13 +8,47 @@ fn main() {
         .read_to_string(&mut input_string)
         .unwrap();
     let dance_moves: Vec<_> = input_string.trim().split(',').collect();
+    let initial_programs = String::from("abcdefghijklmnop").into_bytes();
 
-    let mut programs = String::from("abcdefghijklmnop").into_bytes();
-    for dance_move in dance_moves {
+    // Dance once
+    let mut programs = initial_programs.clone();
+    for dance_move in &dance_moves {
         execute_dance_move(&mut programs, dance_move);
     }
     println!(
-        "Programs after doing the dance: {:?}",
+        "Programs after doing the dance once: {:?}",
+        std::str::from_utf8(&programs).unwrap()
+    );
+
+    // Repeat dance until the programs are back at their initial positions
+    // NOTE: We want to find out the dance's cycle-length, meaning the number of iteration
+    //       we need to dance until we are back at our initial position
+    let mut cycle_length = 0;
+    let mut programs = initial_programs.clone();
+    loop {
+        for dance_move in &dance_moves {
+            execute_dance_move(&mut programs, dance_move);
+        }
+        cycle_length += 1;
+        if programs == initial_programs {
+            break;
+        }
+    }
+    println!(
+        "After {} iterations of the dance, the programs are back in their initial positions!",
+        cycle_length
+    );
+
+    // We can use the cycle-length to quickly calculate 1,000,000,000 dances
+    let num_remaining_dances = 1_000_000_000 % cycle_length;
+    let mut programs = initial_programs.clone();
+    for _ in 0..num_remaining_dances {
+        for dance_move in &dance_moves {
+            execute_dance_move(&mut programs, dance_move);
+        }
+    }
+    println!(
+        "Programs after doing the dance 1,000,000,000 times: {:?}",
         std::str::from_utf8(&programs).unwrap()
     );
 }
