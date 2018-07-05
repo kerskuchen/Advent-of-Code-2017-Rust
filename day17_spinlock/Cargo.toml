@@ -1,0 +1,6 @@
+[package]
+name = "day17_spinlock"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
