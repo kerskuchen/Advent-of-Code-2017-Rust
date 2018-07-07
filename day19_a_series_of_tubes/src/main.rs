@@ -14,7 +14,8 @@ fn main() {
     while packet.movement != Movement::Stopped {
         packet.step(&grid);
     }
-    println!("Letters visited: {:?}", packet.letters_visited);
+    println!("Letters visited: {}", packet.letters_visited);
+    println!("Number of steps taken: {}", packet.num_steps_taken);
 }
 
 #[derive(PartialEq)]
@@ -31,6 +32,7 @@ struct Packet {
     y: i32,
     movement: Movement,
     letters_visited: String,
+    num_steps_taken: usize,
 }
 
 impl Packet {
@@ -40,6 +42,7 @@ impl Packet {
             y: 0,
             movement: Movement::Down,
             letters_visited: String::new(),
+            num_steps_taken: 0,
         }
     }
 
@@ -87,6 +90,10 @@ impl Packet {
             Movement::Left => self.x -= 1,
             Movement::Right => self.x += 1,
             Movement::Stopped => {}
+        }
+
+        if self.movement != Movement::Stopped {
+            self.num_steps_taken += 1;
         }
     }
 }
