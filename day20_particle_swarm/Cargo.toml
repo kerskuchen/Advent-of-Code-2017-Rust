@@ -1,0 +1,7 @@
+[package]
+name = "day20_particle_swarm"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
+text_io = "0.1.7"
