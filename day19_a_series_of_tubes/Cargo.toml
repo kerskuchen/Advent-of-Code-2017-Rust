@@ -1,0 +1,6 @@
+[package]
+name = "day19_a_series_of_tubes"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
