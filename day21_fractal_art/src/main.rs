@@ -32,6 +32,19 @@ fn main() {
         "Pattern after 5 iterations contains {} enabled pixels",
         grid.cells.iter().filter(|&&c| c == '#').count()
     );
+
+    // Last 13 iterations
+    for _ in 0..13 {
+        let subgrids: Vec<Grid> = grid.partition()
+            .into_iter()
+            .map(|subgrid| subgrid.apply_rules(&rules))
+            .collect();
+        grid = Grid::recombine(&subgrids);
+    }
+    println!(
+        "Pattern after 18 iterations contains {} enabled pixels",
+        grid.cells.iter().filter(|&&c| c == '#').count()
+    );
 }
 
 #[derive(Clone)]
