@@ -1,0 +1,6 @@
+[package]
+name = "day21_fractal_art"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
