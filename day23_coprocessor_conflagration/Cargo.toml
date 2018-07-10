@@ -1,0 +1,6 @@
+[package]
+name = "day23_coprocessor_conflagration"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
