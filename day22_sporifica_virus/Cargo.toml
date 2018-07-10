@@ -1,0 +1,6 @@
+[package]
+name = "day22_sporifica_virus"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
