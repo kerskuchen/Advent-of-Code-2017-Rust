@@ -19,16 +19,36 @@ fn main() {
         })
         .collect();
 
-    // Construct bridges
+    // Part one
     let starting_constraint = 0;
     let starting_bridge = [];
-    let max_bridge_strength = construct_bridges(&starting_bridge, components, starting_constraint);
-    println!("Maximum bridge strength: {}", max_bridge_strength);
+    let max_bridge_strength = construct_bridges(
+        &starting_bridge,
+        components.clone(),
+        starting_constraint,
+        &max_strength_function,
+    ).0;
+    println!("Strongest bridge: {}", max_bridge_strength);
+
+    // Part two
+    let strength_of_longest_bridge = construct_bridges(
+        &starting_bridge,
+        components,
+        starting_constraint,
+        &max_length_function,
+    ).0;
+    println!("Strength of longest bridge: {}", strength_of_longest_bridge);
 }
 
-/// Constructs all possible bridges out of given components and returns the maximum bridge strength
-fn construct_bridges(bridge: &[Component], mut components: Vec<Component>, constraint: u32) -> u32 {
-    let mut max_bridge_strength = bridge_strength(bridge);
+/// Constructs all possible bridges out of given components and returns the maximum tuple
+/// (bridge_strength, bridge_length), where the maximum is defined by the given max_function
+fn construct_bridges(
+    bridge: &[Component],
+    mut components: Vec<Component>,
+    constraint: u32,
+    max_function: &Fn((u32, usize), (u32, usize)) -> (u32, usize),
+) -> (u32, usize) {
+    let mut max_bridge_properties = (bridge_strength(bridge), bridge.len());
 
     let next_possible_components = extract_next_possible_components(&mut components, constraint);
     for &next_component in &next_possible_components {
@@ -44,10 +64,15 @@ fn construct_bridges(bridge: &[Component], mut components: Vec<Component>, const
             .collect();
 
         let new_constraint = next_component.1;
-        let bridge_strength = construct_bridges(&new_bridge, remaining_components, new_constraint);
-        max_bridge_strength = u32::max(bridge_strength, max_bridge_strength);
+        let bridge_properties = construct_bridges(
+            &new_bridge,
+            remaining_components,
+            new_constraint,
+            max_function,
+        );
+        max_bridge_properties = max_function(bridge_properties, max_bridge_properties);
     }
-    max_bridge_strength
+    max_bridge_properties
 }
 
 /// Removes and returns components from a given list that match a given constraint
@@ -75,4 +100,22 @@ fn bridge_strength(bridge: &[Component]) -> u32 {
         .iter()
         .map(|component| component.0 + component.1)
         .sum()
+}
+
+fn max_strength_function(a: (u32, usize), b: (u32, usize)) -> (u32, usize) {
+    if a.0 >= b.0 {
+        a
+    } else {
+        b
+    }
+}
+
+fn max_length_function(a: (u32, usize), b: (u32, usize)) -> (u32, usize) {
+    if a.1 > b.1 {
+        a
+    } else if a.1 < b.1 {
+        b
+    } else {
+        max_strength_function(a, b)
+    }
 }
