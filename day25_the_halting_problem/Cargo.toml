@@ -1,0 +1,7 @@
+[package]
+name = "day25_the_halting_problem"
+version = "0.1.0"
+authors = ["Jakob Schwab <j.schwab@mail.de>"]
+
+[dependencies]
+regex = "1"
